@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Collaborative Notebook Application
 
-## Getting Started
+A web-based notebook application that allows users to create, manage, and share notebooks with both text and drawing capabilities.
 
-First, run the development server:
+## Features
 
+### Authentication
+- User registration and login
+- Token-based authentication
+- Session management
+
+### Notebook Management
+- Create and delete notebooks
+- View all notebooks or filter by ownership
+- Search notebooks by title or creator
+- Real-time autosave functionality
+
+### Text Editor
+- Rich text editing
+- Autosave capability
+- Clean and intuitive interface
+
+### Drawing Canvas
+- Freehand drawing tools
+- Eraser functionality
+- Undo capability
+- Clear canvas option
+- Touch screen support
+- Autosave for drawings
+
+### Additional Features
+- PDF export (includes both text and drawings)
+- Owner badges for created notebooks
+- Creation and last updated timestamps
+- Search and filter functionality
+- Responsive design for all devices
+
+## Setup Instructions
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [repository-url]
+cd notebook-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create `.env.local` file in the root directory:
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+## Tech Stack
+- **Frontend**: Next.js, TypeScript, CSS Modules
+- **Backend**: Next.js API Routes
+- **Database**: MongoDB
+- **Authentication**: JWT
+- **PDF Export**: jsPDF
+- **State Management**: React Hooks
 
-To learn more about Next.js, take a look at the following resources:
+## Design Decisions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Split View Layout
+- Separate sections for text and drawing for better organization
+- Side-by-side view for larger screens, stacked for mobile
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Real-time Autosave
+- Automatic saving after each change
+- Local storage backup for unsaved changes
 
-## Deploy on Vercel
+### Canvas Implementation
+- Custom canvas implementation for better control
+- Support for both mouse and touch events
+- Separate stroke history for undo functionality
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Authentication
+- Token-based auth for scalability
+- User-specific notebook ownership
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Improvements
+
+### MyScript API Integration
+- Implement handwriting recognition using MyScript API
+- Convert handwritten notes to digital text
+- Smart stroke detection and correction
+- Enhanced drawing experience with stroke prediction
+
+## Running the Application
+1. Access the application at `http://localhost:3000`
+2. Register a new account or login
+3. Create your first notebook using the "+ New Notebook" button
+4. Start writing and drawing!

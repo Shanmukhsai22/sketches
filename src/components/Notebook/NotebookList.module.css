@@ -1,0 +1,447 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.userInfo {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.userInfo::before {
+  content: '👋';
+  font-size: 1.2rem;
+}
+
+.userInfo:hover {
+  background-color: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.addButton {
+  padding: 10px 20px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
+}
+
+.addButton:hover {
+  background-color: #0052a3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 102, 204, 0.3);
+}
+
+.addButton:active {
+  transform: translateY(1px);
+}
+
+.notebookList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.notebookCard {
+  position: relative;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 180px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.notebookCard:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.notebookHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-right: 70px;
+}
+
+.notebookTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  word-break: break-word;
+  max-width: calc(100% - 40px);
+  line-height: 1.4;
+}
+
+.deleteButton {
+  position: static; 
+  top: auto;
+  right: auto;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #ff4444;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  z-index: 2;
+  border-radius: 50%;
+}
+
+.deleteButton:hover {
+  opacity: 1;
+  background-color: rgba(255, 68, 68, 0.1);
+  transform: scale(1.1);
+}
+
+.notebookMeta {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+  margin-top: 10px;
+}
+
+.createdBy {
+  font-size: 0.9rem;
+  color: #0066cc;
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.createdBy::before {
+  content: '👤';
+  font-size: 1rem;
+}
+
+.dateInfo {
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dateInfo div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dateInfo div::before {
+  content: '📅';
+  font-size: 0.9rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.loadingSpinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0066cc;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.retryButton {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.retryButton:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ownerBadge {
+  position: absolute;
+  top: 20px;
+  right: 100px; /* Increased to make space for buttons */
+  background-color: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+  z-index: 1;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .notebookList {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .userInfo {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .notebookCard {
+    min-height: 160px;
+  }
+
+  .notebookTitle {
+    font-size: 1.1rem;
+  }
+
+  .dateInfo {
+    font-size: 0.8rem;
+  }
+}
+
+.filterSection {
+  margin: 0 20px 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.searchBar {
+  flex: 1;
+  position: relative;
+  min-width: 200px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+}
+
+.filterOptions {
+  display: flex;
+  gap: 10px;
+}
+
+.filterButton {
+  padding: 10px 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterButton:hover {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.filterButton.active {
+  background-color: #0066cc;
+  color: white;
+  border-color: #0066cc;
+}
+
+@media (max-width: 768px) {
+  .filterSection {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .searchBar {
+    width: 100%;
+  }
+
+  .filterOptions {
+    width: 100%;
+  }
+
+  .filterButton {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.notebookList {
+  transition: all 0.3s ease;
+}
+
+.notebookCard {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+
+.downloading {
+  animation: pulse 1.5s infinite;
+  opacity: 0.6;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  z-index: 2;
+}
+
+
+.downloadButton {
+  position : static;
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.downloadButton:hover {
+  opacity: 1;
+  background-color: rgba(0, 102, 204, 0.1);
+  transform: scale(1.1);
+}
+
+.downloadButton:disabled {
+  cursor: not-allowed;
+}
+
+
+

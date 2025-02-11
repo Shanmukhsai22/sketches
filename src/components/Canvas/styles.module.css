@@ -1,0 +1,15 @@
+.canvas {
+    border: 1px solid #ccc;
+    background: white;
+    touch-action: none;
+    width: 100%;
+    max-width: 800px;
+    height: 600px;
+  }
+  
+  .canvasContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
