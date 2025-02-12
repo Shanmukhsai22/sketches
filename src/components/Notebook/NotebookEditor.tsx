@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { StrokeCanvas } from '../Canvas/StrokeCanvas';
-import { Point, Stroke } from '@/types/Notebook';
+import { Stroke } from '@/types/Notebook';
 import styles from './NotebookEditor.module.css';
 import { Alert } from '@/components/common/Alert';
 
@@ -10,7 +9,6 @@ interface NotebookEditorProps {
 }
 
 export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) => {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [strokes, setStrokes] = useState<Stroke[]>([]);
@@ -20,16 +18,31 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
     message: string;
     type: 'error' | 'success' | 'info';
   } | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Reset state when notebookId changes
+  useEffect(() => {
+    setTitle('');
+    setContent('');
+    setStrokes([]);
+    setError(null);
+    setAlert(null);
+    setIsInitialized(false);
+  }, [notebookId]);
 
   useEffect(() => {
-    if (notebookId) {
+    if (notebookId && !isInitialized) {
       fetchNotebookData();
     }
-  }, [notebookId]);
+  }, [notebookId, isInitialized]);
 
   const fetchNotebookData = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(`/api/notebooks/${notebookId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -42,16 +55,18 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
 
       const data = await response.json();
       if (data.success) {
-        setTitle(data.notebook.title);
-        setContent(data.notebook.content);
+        setTitle(data.notebook.title || '');
+        setContent(data.notebook.content || '');
         if (data.notebook.strokes && Array.isArray(data.notebook.strokes)) {
-          const formattedStrokes = data.notebook.strokes.map((stroke: any) => ({
+          const formattedStrokes = data.notebook.strokes.map((stroke: Stroke) => ({
             ...stroke,
             type: stroke.type || 'draw'
           }));
-          console.log('Retrieved strokes:', formattedStrokes);
           setStrokes(formattedStrokes);
+        } else {
+          setStrokes([]);
         }
+        setIsInitialized(true);
       } else {
         throw new Error(data.message || 'Failed to fetch notebook');
       }
@@ -67,6 +82,10 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(`/api/notebooks/${notebookId}`, {
         method: 'PUT',
         headers: {
@@ -86,14 +105,16 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
         throw new Error(data.message || 'Failed to save notebook');
       }
 
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to save notebook');
-      }
-
       setAlert({
         message: 'Notebook saved successfully',
         type: 'success'
       });
+
+      // Clear alert after 3 seconds
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+
     } catch (error) {
       setAlert({
         message: error instanceof Error ? error.message : 'Failed to save notebook',
@@ -104,13 +125,17 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
     }
   };
 
-
   const handleStrokesChange = async (newStrokes: Stroke[]) => {
-    console.log('Saving strokes:', newStrokes);
+    if (!notebookId) return;
+    
     setStrokes(newStrokes);
     
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(`/api/notebooks/${notebookId}`, {
         method: 'PUT',
         headers: {
@@ -191,8 +216,10 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
           <h3 className={styles.sectionTitle}>Drawing</h3>
           <div className={styles.canvasContainer}>
             <StrokeCanvas 
+              key={notebookId || 'new'}
               onStrokesChange={handleStrokesChange}
               initialStrokes={strokes}
+              notebookId={notebookId}
             />
           </div>
         </div>
@@ -200,3 +227,5 @@ export const NotebookEditor: React.FC<NotebookEditorProps> = ({ notebookId }) =>
     </div>
   );
 };
+
+export default NotebookEditor;

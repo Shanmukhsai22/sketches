@@ -16,7 +16,7 @@ export const getSession = async (req: NextApiRequest): Promise<Session | null> =
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as Session;
     return decoded;
-  } catch (error) {
+  } catch  {
     return null;
   }
 };

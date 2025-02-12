@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { Point, Stroke } from '@/types/Notebook';
 import styles from './Canvas.module.css';
@@ -6,39 +6,66 @@ import styles from './Canvas.module.css';
 interface StrokeCanvasProps {
   onStrokesChange?: (strokes: Stroke[]) => void;
   initialStrokes?: Stroke[];
+  notebookId?: string; // Add notebookId prop
 }
 
 export const StrokeCanvas: React.FC<StrokeCanvasProps> = ({
   onStrokesChange,
-  initialStrokes = []
+  initialStrokes = [],
+  notebookId
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentStroke, setCurrentStroke] = useState<Stroke | null>(null);
-  const [strokes, setStrokes] = useState<Stroke[]>(initialStrokes);
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
   const [mode, setMode] = useState<'draw' | 'erase'>('draw');
   const [previousStrokes, setPreviousStrokes] = useState<Stroke[]>([]);
 
-  // Autosave configuration
-  const AUTOSAVE_KEY = 'canvas_autosave';
+  // Create autosave key based on notebookId
+  const getAutosaveKey = useCallback(() => {
+    return notebookId ? `canvas_autosave_${notebookId}` : null;
+  }, [notebookId]);
 
-  // Initialize with initial strokes or load from autosave
+  // Debounced autosave function
+  const autosave = useCallback(
+    debounce((strokesToSave: Stroke[]) => {
+      const key = getAutosaveKey();
+      if (!key) return;
+
+      try {
+        localStorage.setItem(key, JSON.stringify(strokesToSave));
+      } catch (error) {
+        console.error('Error autosaving canvas:', error);
+      }
+    }, 1000),
+    [getAutosaveKey]
+  );
+
+  // Initialize canvas with strokes
   useEffect(() => {
-    if (initialStrokes.length > 0) {
+    // Clear everything when notebookId changes
+    setStrokes([]);
+    setCurrentStroke(null);
+    setPreviousStrokes([]);
+
+    if (initialStrokes?.length > 0) {
       setStrokes(initialStrokes);
     } else {
-      const savedStrokes = localStorage.getItem(AUTOSAVE_KEY);
-      if (savedStrokes) {
-        try {
-          const parsedStrokes = JSON.parse(savedStrokes);
-          setStrokes(parsedStrokes);
-        } catch (error) {
-          console.error('Error loading autosaved strokes:', error);
+      const key = getAutosaveKey();
+      if (key) {
+        const savedStrokes = localStorage.getItem(key);
+        if (savedStrokes) {
+          try {
+            const parsedStrokes = JSON.parse(savedStrokes);
+            setStrokes(parsedStrokes);
+          } catch (error) {
+            console.error('Error loading autosaved strokes:', error);
+          }
         }
       }
     }
-  }, [initialStrokes]);
+  }, [notebookId, initialStrokes, getAutosaveKey]);
 
   // Canvas initialization
   useEffect(() => {
@@ -68,24 +95,17 @@ export const StrokeCanvas: React.FC<StrokeCanvasProps> = ({
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
-  // Create debounced autosave function
-  const autosave = debounce((strokesToSave: Stroke[]) => {
-    try {
-      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(strokesToSave));
-      console.log('Canvas autosaved');
-    } catch (error) {
-      console.error('Error autosaving canvas:', error);
-    }
-  }, 1000);
-
   // Update autosave when strokes change
   useEffect(() => {
+    const key = getAutosaveKey();
+    if (!key) return;
+
     if (strokes.length > 0) {
       autosave(strokes);
     } else {
-      localStorage.removeItem(AUTOSAVE_KEY);
+      localStorage.removeItem(key);
     }
-  }, [strokes]);
+  }, [strokes, autosave, getAutosaveKey]);
 
   // Render strokes
   useEffect(() => {
@@ -168,7 +188,7 @@ export const StrokeCanvas: React.FC<StrokeCanvasProps> = ({
 
     if (currentStroke.points.length > 1) {
       const newStrokes = [...strokes, currentStroke];
-      setPreviousStrokes(strokes); // Save current state for undo
+      setPreviousStrokes(strokes);
       setStrokes(newStrokes);
       onStrokesChange?.(newStrokes);
     }
@@ -186,21 +206,21 @@ export const StrokeCanvas: React.FC<StrokeCanvasProps> = ({
     if (strokes.length > 0) {
       setStrokes(previousStrokes);
       onStrokesChange?.(previousStrokes);
-      console.log('Undo successful');
     }
   };
 
   const clearCanvas = () => {
-    setPreviousStrokes(strokes); // Save current state for undo
+    setPreviousStrokes(strokes);
     setStrokes([]);
     onStrokesChange?.([]);
-    localStorage.removeItem(AUTOSAVE_KEY);
-    console.log('Canvas cleared');
+    const key = getAutosaveKey();
+    if (key) {
+      localStorage.removeItem(key);
+    }
   };
 
   const toggleMode = () => {
     setMode(mode === 'draw' ? 'erase' : 'draw');
-    console.log('Mode changed:', mode === 'draw' ? 'erase' : 'draw');
   };
 
   return (

@@ -13,7 +13,7 @@ export default async function handler(
     // Get user from token
     const token = req.headers.authorization?.replace('Bearer ', '');
     let userId = null;
-    let userName = 'Anonymous';
+    //const userName = 'Anonymous';
 
     if (token) {
       try {

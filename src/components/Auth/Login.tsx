@@ -50,21 +50,24 @@ export const Login = () => {
         return;
       }
 
+      // Show success message
       setSuccess('Login successful! Redirecting...');
       
       // Store token
       localStorage.setItem('token', data.token);
       
+      // Clear form
       setFormData({
         email: '',
         password: '',
       });
 
+      // Redirect after a short delay
       setTimeout(() => {
         router.push('/notebooks');
       }, 1500);
 
-    } catch (err) {
+    } catch  {
       setError('An error occurred during login. Please try again.');
     } finally {
       setLoading(false);
@@ -132,7 +135,7 @@ export const Login = () => {
 
         <div className={styles.link}>
           <Link href="/auth/register">
-            Don't have an account? Sign up
+            Dont have an account? Sign up
           </Link>
         </div>
       </form>

@@ -29,12 +29,14 @@ export const Register = () => {
     setSuccess('');
     setLoading(true);
 
+    // Basic validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
+    // Password validation
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
       setLoading(false);
@@ -67,6 +69,7 @@ export const Register = () => {
         return;
       }
 
+      // Show success message
       setSuccess('Registration successful! Redirecting to login...');
       
       // Clear form
@@ -77,12 +80,12 @@ export const Register = () => {
         confirmPassword: '',
       });
 
-    
+      // Redirect after a short delay
       setTimeout(() => {
         router.push('/auth/login');
       }, 2000);
 
-    } catch (err) {
+    } catch {
       setError('An error occurred during registration. Please try again.');
     } finally {
       setLoading(false);

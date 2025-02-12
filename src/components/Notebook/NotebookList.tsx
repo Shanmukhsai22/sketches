@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import jsPDF from 'jspdf';
 import styles from './NotebookList.module.css';
 import { Alert } from '@/components/common/Alert';
-
 
 interface User {
   _id: string;
@@ -37,21 +36,7 @@ export const NotebookList: React.FC = () => {
     type: 'error' | 'success' | 'info';
   } | null>(null);
 
-  useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (currentUser) {
-      fetchNotebooks();
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    filterNotebooks();
-  }, [notebooks, showOnlyMyNotebooks, searchQuery]);
-
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -75,9 +60,11 @@ export const NotebookList: React.FC = () => {
       setError('Failed to authenticate user');
       router.push('/auth/login');
     }
-  };
+  }, [router]);
 
-  const fetchNotebooks = async () => {
+  const fetchNotebooks = useCallback(async () => {
+    if (!currentUser) return;
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/notebooks', {
@@ -107,20 +94,51 @@ export const NotebookList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  const filterNotebooks = useCallback(() => {
+    let filtered = [...notebooks];
+    
+    if (showOnlyMyNotebooks) {
+      filtered = filtered.filter(notebook => notebook.isOwner);
+    }
+
+    if (searchQuery) {
+      filtered = filtered.filter(notebook => 
+        notebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notebook.user?.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredNotebooks(filtered);
+  }, [notebooks, showOnlyMyNotebooks, searchQuery]);
+
+  useEffect(() => {
+    fetchCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchNotebooks();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  useEffect(() => {
+    filterNotebooks();
+  }, [filterNotebooks]);
 
   const handleDownloadNotebook = async (notebook: Notebook, e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDownloading(true);
     
     try {
-      // First, navigate to the notebook page to get the canvas content
       const notebookWindow = window.open(`/notebooks/${notebook._id}`, '_blank');
       
       if (!notebookWindow) {
         throw new Error('Popup blocked. Please allow popups and try again.');
       }
-  
     
       await new Promise<void>((resolve) => {
         notebookWindow.onload = () => {
@@ -128,12 +146,9 @@ export const NotebookList: React.FC = () => {
             try {
               const pdf = new jsPDF('p', 'mm', 'a4');
               const pageWidth = pdf.internal.pageSize.getWidth();
-              const pageHeight = pdf.internal.pageSize.getHeight();
-              
               
               pdf.setFontSize(24);
               pdf.text(notebook.title, 20, 20);
-              
               
               if (notebook.content) {
                 pdf.setFontSize(12);
@@ -141,23 +156,17 @@ export const NotebookList: React.FC = () => {
                 pdf.text(splitText, 20, 40);
               }
               
-             
               const canvas = notebookWindow.document.querySelector('canvas') as HTMLCanvasElement;
               if (canvas) {
-                
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
                 
                 if (tempCtx) {
-                  
                   tempCtx.fillStyle = 'white';
                   tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                  
-                  
                   tempCtx.drawImage(canvas, 0, 0);
-                  
                   
                   pdf.addPage();
                   const canvasImage = tempCanvas.toDataURL('image/png', 1.0);
@@ -174,10 +183,7 @@ export const NotebookList: React.FC = () => {
                 }
               }
               
-              
               pdf.save(`${notebook.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-              
-              
               notebookWindow.close();
               resolve();
             } catch (error) {
@@ -185,7 +191,7 @@ export const NotebookList: React.FC = () => {
               notebookWindow.close();
               throw error;
             }
-          }, 1000); 
+          }, 1000);
         };
       });
     } catch (err) {
@@ -194,23 +200,6 @@ export const NotebookList: React.FC = () => {
     } finally {
       setIsDownloading(false);
     }
-  };
-
-  const filterNotebooks = () => {
-    let filtered = [...notebooks];
-    
-    if (showOnlyMyNotebooks) {
-      filtered = filtered.filter(notebook => notebook.isOwner);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(notebook => 
-        notebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        notebook.user?.email.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredNotebooks(filtered);
   };
 
   const handleDeleteNotebook = async (notebookId: string, e: React.MouseEvent) => {
@@ -309,6 +298,7 @@ export const NotebookList: React.FC = () => {
           onClose={() => setAlert(null)}
         />
       )}
+      
       <div className={styles.header}>
         {currentUser && (
           <div className={styles.userInfo}>
@@ -352,7 +342,7 @@ export const NotebookList: React.FC = () => {
             {searchQuery 
               ? 'No notebooks found matching your search.'
               : showOnlyMyNotebooks 
-                ? 'You haven\'t created any notebooks yet.'
+                ? 'You haven&apos;t created any notebooks yet.'
                 : 'No notebooks available.'}
           </p>
         </div>
@@ -362,7 +352,6 @@ export const NotebookList: React.FC = () => {
             <div
               key={notebook._id}
               className={styles.notebookCard}
-              data-notebook-id={notebook._id}
               onClick={() => router.push(`/notebooks/${notebook._id}`)}
             >
               <div className={styles.notebookHeader}>
@@ -408,3 +397,5 @@ export const NotebookList: React.FC = () => {
     </div>
   );
 };
+
+export default NotebookList;

@@ -2,8 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
 
-export interface HeaderProps {
-}
+type EmptyObject = Record<string, never>;
+
+export type HeaderProps = EmptyObject;
+
 
 export const Header: React.FC<HeaderProps> = () => {
   return (
